@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--
+        Customize the content security policy in the meta tag below as needed. Add 'unsafe-inline' to default-src to enable inline JavaScript.
+        For details, see http://go.microsoft.com/fwlink/?LinkID=617521
+    -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'unsafe-inline' 'self' data: gap: https://ssl.gstatic.com http://en.lichess.org 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; connect-src *">
+
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <script>
+            function loadLogin() {
+                var xhttp = new XMLHttpRequest();
+                var url = "http://en.lichess.org/login";
+                var params = "username=" + document.getElementById("name").value + "&password=" + document.getElementById("pass").value;
+                xhttp.open("POST", url, false);
+                xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                // send the proper header information along with the request
+                xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
+                xhttp.send(params);
+                document.getElementById("demo3").innerHTML = xhttp.statusText;
+                document.getElementById("demo2").innerHTML = xhttp.getAllResponseHeaders();
+                document.getElementById("demo").innerHTML = JSON.stringify(JSON.parse(xhttp.responseText), null, 4);
+                //fetchGame();
+            }
+
+            function createGame() {
+                var xhttp = new XMLHttpRequest();
+                var url = "http://en.lichess.org/setup/ai";
+                var params = "variant=" + document.getElementById("variant").value + "&timeMode=" + document.getElementById("timeMode").value + "&days=2&time=10&increment=0&level=" + document.getElementById("level").value + "&color=" + document.getElementById("color").value;
+                xhttp.open("POST", url, false);
+                xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                // send the proper header information along with the request
+                xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
+                xhttp.send(params);
+            }
+
+            function loadUser() {
+
+                var xhttp = new XMLHttpRequest();
+                var url = "http://en.lichess.org/account/info/";
+                var bustCache = '?' + new Date().getTime();
+                xhttp.open("GET", url + bustCache, false);
+
+                // send the proper header information along with the request
+                xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
+                xhttp.send();
+                document.getElementById("demo3").innerHTML = xhttp.statusText;
+                document.getElementById("demo2").innerHTML = xhttp.getAllResponseHeaders();
+                document.getElementById("demo").innerHTML = JSON.stringify(JSON.parse(xhttp.responseText), null, 4);
+                
+                document.getElementById("gameList").innerHTML = "null";
+
+                for (i = 0; i < JSON.parse(xhttp.responseText).nowPlaying.length; i++) {
+                    innerOptions = document.getElementById("gameList").innerHTML;
+                    document.getElementById("gameList").innerHTML = innerOptions + "<option value=" + JSON.parse(xhttp.responseText).nowPlaying[i].fullId + ">" + JSON.parse(xhttp.responseText).nowPlaying[i].fullId + "</option>";
+                }
+
+                document.getElementById("gameConnectButton").disabled = false;
+            }
+
+            function loadLogout() {
+                var xhttp = new XMLHttpRequest();
+                var url = "http://en.lichess.org/logout";
+                xhttp.open("GET", url, false);
+
+                // send the proper header information along with the request
+                xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
+                xhttp.send();
+                document.getElementById("demo3").innerHTML = xhttp.statusText;
+                document.getElementById("demo2").innerHTML = xhttp.getAllResponseHeaders();
+                document.getElementById("demo").innerHTML = JSON.stringify(JSON.parse(xhttp.responseText), null, 4);
+
+                
+                try {
+                    clearInterval(pinger);
+                    socket.close();
+                }
+                catch (err) {
+
+                }
+            }
+
+            function fetchSocketUrl(fullID) {
+                var xhttp = new XMLHttpRequest();
+                var url = "http://en.lichess.org/"+fullID;
+                xhttp.open("GET", url, false);
+
+                // send the proper header information along with the request
+                xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
+                xhttp.send();
+                //alert(url);
+
+                var socketURL = JSON.parse(xhttp.responseText).url.socket;
+                //alert(socketURL);
+                return socketURL;
+            }
+
+            //function fetchGame() {
+            //    var xhttp = new XMLHttpRequest();
+            //    var url = "http://en.lichess.org/j0SSEyuWXeBu";
+            //    xhttp.open("GET", url, false);
+
+            //    // send the proper header information along with the request
+            //    xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
+            //    xhttp.send();
+            //    //alert(url);
+
+            //    alert(JSON.stringify(JSON.parse(xhttp.responseText)));
+
+            //}
+
+            function fetchFullID() {
+
+                var fullID = document.getElementById("gameList").value;
+
+                //alert(fullID);
+                return fullID;
+            }
+
+            function fetchVersion(fullID) {
+                var xhttp = new XMLHttpRequest();
+                var url = "http://en.lichess.org/" + fullID;
+                xhttp.open("GET", url, false);
+
+                // send the proper header information along with the request
+                xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
+                xhttp.send();
+                //alert(url);
+
+                var version = JSON.parse(xhttp.responseText).player.version;
+
+                return version;
+            }
+
+            function updateVersion(version) {
+                window.version = version;
+                //alert("version is now: " + version);
+            }
+
+            // connect to a game as a player
+            function gameConnect() {
+                // var fullID = document.getElementById("fullID").value;
+                var fullID = fetchFullID();
+                var versionInit = fetchVersion(fullID);
+                updateVersion(versionInit);
+
+                var baseUrl = fetchSocketUrl(fullID); // obtained from game creation API (`url.socket`)
+                clientId = Math.random().toString(36).substring(2); // created and stored by the client
+
+                var socketUrl = 'ws://socket.en.lichess.org:9021' + baseUrl + '?sri=' + clientId+'&ran=--ranph--';
+                //alert(socketUrl);
+
+                try {
+                    socket.close();
+                }
+                catch (err) {
+
+                }
+
+                window.socket = new WebSocket(socketUrl);
+
+                socket.onopen = function () {
+
+                    window.pinger = setInterval(function () {
+                    
+                    socket.send(JSON.stringify({
+                        t: 'p',
+                        v: version
+                    }));
+
+                    }, 2000)
+
+                };
+
+                socket.onmessage = function (event) {
+                    //alert("I received a message!");
+                    var innerStuff = document.getElementById("demo4").innerHTML;
+                    try {
+                        if (JSON.parse(event.data).d.uci) {
+                            updateVersion(JSON.parse(event.data).d.uci);
+                            if (document.getElementById('autoSend').checked)
+                                bluetoothSerial.write(JSON.parse(event.data).d.uci);
+                            document.getElementById("opponentMove").value = JSON.parse(event.data).d.uci;
+                            //if (d.castle)
+                            //    alert("castle!");
+                            //if (d.enpassant)
+                            //    alert("en passant!");
+                            if (d.check)
+                                alert("check!");
+                        }
+                        else if (JSON.parse(event.data).d[1].t="end") {
+                            if (document.getElementById('autoSend').checked)
+                                bluetoothSerial.write(JSON.parse(event.data).d[0].d.uci);
+                            document.getElementById("opponentMove").value = JSON.parse(event.data).d[0].d.uci;
+                            if (d[1].d)
+                                alert(d[1].d + "wins!");
+                            else
+                                alert("stalemate!");
+                        }
+                    }
+                    catch(err) {
+
+                    }
+                    
+                    if (document.getElementById("autoLog").checked)
+                        document.getElementById("demo4").innerHTML = innerStuff + 'received: ' + event.data + "<br>";
+                    
+                    
+                };
+
+                socket.onerror = function () {
+                    alert('error occurred!');
+                };
+
+                socket.onclose = function (event) {
+                    alert('connection lost! Please Reconnect to game');
+                    clearInterval(pinger);
+                    socket.close();
+                    //gameConnect();
+                };
+
+            }
+
+            function sendMove() {
+                var move = {
+                    t: 'move',
+                    d: {
+                        from: document.getElementById("from").value,
+                        to: document.getElementById("to").value
+                    }
+                };
+                socket.send(JSON.stringify(move));
+            }
+
+    </script>
+    <title>ChesstronicV1</title>
+</head>
+<body>
+    <div class="app">
+        <!--begin section added in from BlueApp2-->
+
+        <h1>Bluetooth Serial Chat</h1>
+        <div id="mainPage">
+            <ul id="deviceList"></ul>
+            <button id="refreshButton">Refresh</button>
+        </div>
+        <div id="detailPage">
+            <div id="resultDiv"></div>
+            <div>
+                <input type="text" id="messageInput" value="Hello" />
+                <button id="sendButton">Send</button>
+            </div>
+            <button id="disconnectButton">Disconnect</button>
+        </div>
+        <div id="statusDiv"></div>
+
+        <!--end section added in from BlueApp2-->
+        <input type="text" id="name" value="Lanyon">
+
+        <input type="password" id="pass" value="|LANy0n|">
+
+        <button onclick="loadLogin()">Login</button>
+
+        <button onclick="loadUser()">User Info & Games</button>
+
+        <button onclick="loadLogout()">Logout</button>
+
+        <select id="variant">
+            <option value="1">Standard</option>
+            <option value="2">Chess960</option>
+            <option value="5">Three-check</option>
+        </select>
+
+        <select id="level">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">5</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+        </select>
+
+        <select id="color">
+            <option value="white">white</option>
+            <option value="black">black</option>
+            <option value="random">random</option>
+        </select>
+
+        <select id="timeMode">
+            <option value="0">Unlimited</option>
+            <option value="1">Real time</option>
+        </select>
+
+        <!--<input type="text" id="fullID" value="fullID">-->
+
+        <button onclick="createGame()">Create Game</button>
+
+        <select id="gameList">
+
+        </select>
+
+        <button onclick="gameConnect()" id="gameConnectButton" disabled>Connect to Game</button>
+
+        <input type="text" id="from" value="from">
+
+        <input type="text" id="to" value="to">
+
+        <input type="text" id="opponentMove" disabled>
+
+        <button onclick="sendMove()">Send move</button>
+
+        <input type="checkbox" id="autoLog"> Log server communication<br>
+        <input type="checkbox" id="autoSend" checked> Send moves automatically<br>
+
+        <p id="demo">asdfasfasdfa</p>
+        <p id="demo2">asdfasfasdfa</p>
+        <p id="demo3">asdfasfasdfa</p>
+        <p id="demo4">log socket stuffs here</p>
+
+
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="scripts/index.js"></script>
+        <script type="text/javascript">
+            app.initialize();
+        </script>
+
+
+    </div>
+
+</body>
+</html>
