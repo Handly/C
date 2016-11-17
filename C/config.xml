@@ -94,10 +94,10 @@
   <platform name="wp8">
     <splash height="1280" src="res/screens/wp8/SplashScreenImage.png" width="768" />
   </platform>
-  <plugin name="cordova-plugin-crosswalk-webview" src="https://github.com/crosswalk-project/cordova-plugin-crosswalk-webview.git" version="1.6.1" />
   <preference name="xwalkVersion" value="xwalk_core_library_beta:18+" />
   <preference name="xwalkCommandLine" value="--disable-pull-to-refresh-effect" />
   <preference name="xwalkMode" value="embedded" />
   <preference name="xwalkMultipleApk" value="true" />
   <plugin name="cordova-plugin-bluetooth-serial" version="0.4.5" src="D:\Lanyon\VisualStudio\Plugins\cordova-plugin-bluetooth-serial" />
+  <plugin name="cordova-plugin-crosswalk-webview" version="1.6.1" src="F:\cordova-plugin-crosswalk-webview-1.6.1\cordova-plugin-crosswalk-webview-1.6.1" />
 </widget>
