@@ -1,13 +1,4 @@
 {
-    "cordova-plugin-crosswalk-webview": {
-        "source": {
-            "type": "git",
-            "url": "https://github.com/crosswalk-project/cordova-plugin-crosswalk-webview.git",
-            "subdir": "."
-        },
-        "is_top_level": true,
-        "variables": {}
-    },
     "cordova-plugin-whitelist": {
         "source": {
             "type": "registry",
@@ -20,6 +11,14 @@
         "source": {
             "type": "local",
             "path": "D:\\Lanyon\\VisualStudio\\Plugins\\cordova-plugin-bluetooth-serial"
+        },
+        "is_top_level": true,
+        "variables": {}
+    },
+    "cordova-plugin-crosswalk-webview": {
+        "source": {
+            "type": "local",
+            "path": "F:\\cordova-plugin-crosswalk-webview-1.6.1\\cordova-plugin-crosswalk-webview-1.6.1"
         },
         "is_top_level": true,
         "variables": {}

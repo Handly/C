@@ -11,236 +11,25 @@
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
     <link rel="stylesheet" type="text/css" href="css/index.css">
+
+    <link rel="stylesheet" href="css/chessboard.css" />
+    <link rel="stylesheet" href="css/foundation-3.2.5.min.css" />
+    <link rel="stylesheet" href="css/normalize-2.1.2.min.css" />
+
     <script>
-            function loadLogin() {
-                var xhttp = new XMLHttpRequest();
-                var url = "http://en.lichess.org/login";
-                var params = "username=" + document.getElementById("name").value + "&password=" + document.getElementById("pass").value;
-                xhttp.open("POST", url, false);
-                xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                // send the proper header information along with the request
-                xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
-                xhttp.send(params);
-                document.getElementById("demo3").innerHTML = xhttp.statusText;
-                document.getElementById("demo2").innerHTML = xhttp.getAllResponseHeaders();
-                document.getElementById("demo").innerHTML = JSON.stringify(JSON.parse(xhttp.responseText), null, 4);
-                //fetchGame();
-            }
 
-            function createGame() {
-                var xhttp = new XMLHttpRequest();
-                var url = "http://en.lichess.org/setup/ai";
-                var params = "variant=" + document.getElementById("variant").value + "&timeMode=" + document.getElementById("timeMode").value + "&days=2&time=10&increment=0&level=" + document.getElementById("level").value + "&color=" + document.getElementById("color").value;
-                xhttp.open("POST", url, false);
-                xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                // send the proper header information along with the request
-                xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
-                xhttp.send(params);
-            }
-
-            function loadUser() {
-
-                var xhttp = new XMLHttpRequest();
-                var url = "http://en.lichess.org/account/info/";
-                var bustCache = '?' + new Date().getTime();
-                xhttp.open("GET", url + bustCache, false);
-
-                // send the proper header information along with the request
-                xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
-                xhttp.send();
-                document.getElementById("demo3").innerHTML = xhttp.statusText;
-                document.getElementById("demo2").innerHTML = xhttp.getAllResponseHeaders();
-                document.getElementById("demo").innerHTML = JSON.stringify(JSON.parse(xhttp.responseText), null, 4);
-                
-                document.getElementById("gameList").innerHTML = "null";
-
-                for (i = 0; i < JSON.parse(xhttp.responseText).nowPlaying.length; i++) {
-                    innerOptions = document.getElementById("gameList").innerHTML;
-                    document.getElementById("gameList").innerHTML = innerOptions + "<option value=" + JSON.parse(xhttp.responseText).nowPlaying[i].fullId + ">" + JSON.parse(xhttp.responseText).nowPlaying[i].fullId + "</option>";
-                }
-
-                document.getElementById("gameConnectButton").disabled = false;
-            }
-
-            function loadLogout() {
-                var xhttp = new XMLHttpRequest();
-                var url = "http://en.lichess.org/logout";
-                xhttp.open("GET", url, false);
-
-                // send the proper header information along with the request
-                xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
-                xhttp.send();
-                document.getElementById("demo3").innerHTML = xhttp.statusText;
-                document.getElementById("demo2").innerHTML = xhttp.getAllResponseHeaders();
-                document.getElementById("demo").innerHTML = JSON.stringify(JSON.parse(xhttp.responseText), null, 4);
-
-                
-                try {
-                    clearInterval(pinger);
-                    socket.close();
-                }
-                catch (err) {
-
-                }
-            }
-
-            function fetchSocketUrl(fullID) {
-                var xhttp = new XMLHttpRequest();
-                var url = "http://en.lichess.org/"+fullID;
-                xhttp.open("GET", url, false);
-
-                // send the proper header information along with the request
-                xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
-                xhttp.send();
-                //alert(url);
-
-                var socketURL = JSON.parse(xhttp.responseText).url.socket;
-                //alert(socketURL);
-                return socketURL;
-            }
-
-            //function fetchGame() {
-            //    var xhttp = new XMLHttpRequest();
-            //    var url = "http://en.lichess.org/j0SSEyuWXeBu";
-            //    xhttp.open("GET", url, false);
-
-            //    // send the proper header information along with the request
-            //    xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
-            //    xhttp.send();
-            //    //alert(url);
-
-            //    alert(JSON.stringify(JSON.parse(xhttp.responseText)));
-
-            //}
-
-            function fetchFullID() {
-
-                var fullID = document.getElementById("gameList").value;
-
-                //alert(fullID);
-                return fullID;
-            }
-
-            function fetchVersion(fullID) {
-                var xhttp = new XMLHttpRequest();
-                var url = "http://en.lichess.org/" + fullID;
-                xhttp.open("GET", url, false);
-
-                // send the proper header information along with the request
-                xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
-                xhttp.send();
-                //alert(url);
-
-                var version = JSON.parse(xhttp.responseText).player.version;
-
-                return version;
-            }
-
-            function updateVersion(version) {
-                window.version = version;
-                //alert("version is now: " + version);
-            }
-
-            // connect to a game as a player
-            function gameConnect() {
-                // var fullID = document.getElementById("fullID").value;
-                var fullID = fetchFullID();
-                var versionInit = fetchVersion(fullID);
-                updateVersion(versionInit);
-
-                var baseUrl = fetchSocketUrl(fullID); // obtained from game creation API (`url.socket`)
-                clientId = Math.random().toString(36).substring(2); // created and stored by the client
-
-                var socketUrl = 'ws://socket.en.lichess.org:9021' + baseUrl + '?sri=' + clientId+'&ran=--ranph--';
-                //alert(socketUrl);
-
-                try {
-                    socket.close();
-                }
-                catch (err) {
-
-                }
-
-                window.socket = new WebSocket(socketUrl);
-
-                socket.onopen = function () {
-
-                    window.pinger = setInterval(function () {
-                    
-                    socket.send(JSON.stringify({
-                        t: 'p',
-                        v: version
-                    }));
-
-                    }, 2000)
-
-                };
-
-                socket.onmessage = function (event) {
-                    //alert("I received a message!");
-                    var innerStuff = document.getElementById("demo4").innerHTML;
-                    try {
-                        if (JSON.parse(event.data).d.uci) {
-                            updateVersion(JSON.parse(event.data).d.uci);
-                            if (document.getElementById('autoSend').checked)
-                                bluetoothSerial.write(JSON.parse(event.data).d.uci);
-                            document.getElementById("opponentMove").value = JSON.parse(event.data).d.uci;
-                            //if (d.castle)
-                            //    alert("castle!");
-                            //if (d.enpassant)
-                            //    alert("en passant!");
-                            if (d.check)
-                                alert("check!");
-                        }
-                        else if (JSON.parse(event.data).d[1].t="end") {
-                            if (document.getElementById('autoSend').checked)
-                                bluetoothSerial.write(JSON.parse(event.data).d[0].d.uci);
-                            document.getElementById("opponentMove").value = JSON.parse(event.data).d[0].d.uci;
-                            if (d[1].d)
-                                alert(d[1].d + "wins!");
-                            else
-                                alert("stalemate!");
-                        }
-                    }
-                    catch(err) {
-
-                    }
-                    
-                    if (document.getElementById("autoLog").checked)
-                        document.getElementById("demo4").innerHTML = innerStuff + 'received: ' + event.data + "<br>";
-                    
-                    
-                };
-
-                socket.onerror = function () {
-                    alert('error occurred!');
-                };
-
-                socket.onclose = function (event) {
-                    alert('connection lost! Please Reconnect to game');
-                    clearInterval(pinger);
-                    socket.close();
-                    //gameConnect();
-                };
-
-            }
-
-            function sendMove() {
-                var move = {
-                    t: 'move',
-                    d: {
-                        from: document.getElementById("from").value,
-                        to: document.getElementById("to").value
-                    }
-                };
-                socket.send(JSON.stringify(move));
-            }
 
     </script>
     <title>ChesstronicV1</title>
 </head>
 <body>
     <div class="app">
+
+    
+
+
+
+
         <!--begin section added in from BlueApp2-->
 
         <h1>Bluetooth Serial Chat</h1>
@@ -301,11 +90,55 @@
 
         <button onclick="createGame()">Create Game</button>
 
-        <select id="gameList">
-
-        </select>
+        <select id="gameList"></select>
 
         <button onclick="gameConnect()" id="gameConnectButton" disabled>Connect to Game</button>
+
+
+
+
+
+
+
+        <!--begin section from example 1000-->
+        <!-- start example HTML -->
+        <div id="board" style="width: 100%"></div>
+        <!-- end example HTML -->
+
+        <script src="scripts/jquery-1.10.1.min.js"></script>
+        <script src="scripts/chessboard.js"></script>
+        <script>
+            var init = function () {
+
+                //--- start example JS ---
+
+                var onDrop = function (source, target) {
+                    document.getElementById("from").value = source;
+                    document.getElementById("to").value = target;
+                    if (document.getElementById('autoSend').checked)
+                        sendMove();
+                };
+
+                var cfg = {
+                    draggable: true,
+                    position: 'start',
+                    onDrop: onDrop,
+                    sparePieces: true
+                };
+                window.board = ChessBoard('board', cfg);
+                //--- end example JS ---
+
+            }; // end init()
+            $(document).ready(init);
+        </script>
+
+        <!--end section from example 1000-->
+
+
+
+
+
+
 
         <input type="text" id="from" value="from">
 
@@ -326,6 +159,7 @@
 
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="scripts/index.js"></script>
+        <script type="text/javascript" src="scripts/lichess.js"></script>
         <script type="text/javascript">
             app.initialize();
         </script>
