@@ -102,7 +102,7 @@
 
         <!--begin section from example 1000-->
         <!-- start example HTML -->
-        <div id="board" style="width: 100%"></div>
+        <div id="board" style="width: 360px"></div>
         <!-- end example HTML -->
 
         <script src="scripts/jquery-1.10.1.min.js"></script>
@@ -115,7 +115,7 @@
                 var onDrop = function (source, target) {
                     document.getElementById("from").value = source;
                     document.getElementById("to").value = target;
-                    if (document.getElementById('autoSend').checked)
+                    if (document.getElementById('autoSend').checked && source != target)
                         sendMove();
                 };
 
@@ -123,7 +123,7 @@
                     draggable: true,
                     position: 'start',
                     onDrop: onDrop,
-                    sparePieces: true
+                    sparePieces: false
                 };
                 window.board = ChessBoard('board', cfg);
                 //--- end example JS ---
@@ -147,6 +147,8 @@
         <input type="text" id="opponentMove" disabled>
 
         <button onclick="sendMove()">Send move</button>
+
+        <button onclick="syncFEN()">Sync board</button>
 
         <input type="checkbox" id="autoLog"> Log server communication<br>
         <input type="checkbox" id="autoSend" checked> Send moves automatically<br>

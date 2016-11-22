@@ -122,6 +122,26 @@ function fetchVersion(fullID) {
     return version;
 }
 
+function fetchFEN(fullID) {
+    var xhttp = new XMLHttpRequest();
+    var url = "http://en.lichess.org/" + fullID;
+    xhttp.open("GET", url, false);
+
+    // send the proper header information along with the request
+    xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
+    xhttp.send();
+    //alert(url);
+
+    //var currentFEN = JSON.parse(xhttp.responseText).game.fen;
+    //var n = currentFEN.indexOf(" ");
+
+    //return currentFEN.slice(0, n);
+
+    var currentFEN = JSON.parse(xhttp.responseText).game.fen;
+
+    return currentFEN;
+}
+
 function updateVersion(version) {
     window.version = version;
     //alert("version is now: " + version);
@@ -129,8 +149,12 @@ function updateVersion(version) {
 
 // connect to a game as a player
 function gameConnect() {
+    window.awaitingAck = false;
+    window.winner = false;
+    
     // var fullID = document.getElementById("fullID").value;
     var fullID = fetchFullID();
+    window.currentGame = fullID;
     var versionInit = fetchVersion(fullID);
     updateVersion(versionInit);
 
@@ -160,6 +184,10 @@ function gameConnect() {
 
         }, 2000)
 
+        //setTimeout(function () { alert('connected!'); }, 1);
+        syncFEN();
+
+
     };
 
     socket.onmessage = function (event) {
@@ -169,6 +197,18 @@ function gameConnect() {
         var eventData = JSON.parse(currEvent.data);
         if (eventData.hasOwnProperty("t")) {
             //alert(eventData.d.uci);
+            if (eventData.t == "resync") {
+                gameConnect();
+                //setTimeout(function () { alert("game resynced and connected!"); }, 1);
+                
+            }
+            if (awaitingAck && eventData.t != "ack") {
+                sendMove();
+            }
+            else if (awaitingAck && eventData.t == "ack") {
+                //alert("ack received");
+                awaitingAck = false;
+            }
             if (eventData.t == "move") {
                 board.move(eventData.d.uci.substring(0, 2) + "-" + eventData.d.uci.substring(2, 4));
                 bluetoothSerial.write(eventData.d.uci);
@@ -230,12 +270,17 @@ function gameConnect() {
     };
 
     socket.onclose = function (event) {
-        alert('connection lost! Please Reconnect to game');
+        //setTimeout(function () { alert('connection lost! Please Reconnect to game'); }, 1);
+        
         clearInterval(pinger);
-        socket.close();
+        //socket.close();
         //gameConnect();
     };
 
+}
+
+function syncFEN() {
+    board.position(fetchFEN(currentGame), false);
 }
 
 function sendMove() {
@@ -246,5 +291,15 @@ function sendMove() {
             to: document.getElementById("to").value
         }
     };
+    //send initially
+    //socket.send(JSON.stringify(move));
+    //send periodically until lichess responds with "ack"
+    //window.moveSender = setInterval(function () {
+
+    //    socket.send(JSON.stringify(move));
+
+    //}, 100)
+
     socket.send(JSON.stringify(move));
+    window.awaitingAck = true;
 }
