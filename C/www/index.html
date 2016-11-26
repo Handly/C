@@ -5,169 +5,312 @@
         Customize the content security policy in the meta tag below as needed. Add 'unsafe-inline' to default-src to enable inline JavaScript.
         For details, see http://go.microsoft.com/fwlink/?LinkID=617521
     -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'unsafe-inline' 'self' data: gap: https://ssl.gstatic.com http://en.lichess.org 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; connect-src *">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'unsafe-inline' 'self' data: gap: https://ssl.gstatic.com http://en.lichess.org https://code.jquery.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; connect-src *">
 
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
-    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <!--<link rel="stylesheet" type="text/css" href="css/index.css">-->
 
     <link rel="stylesheet" href="css/chessboard.css" />
-    <link rel="stylesheet" href="css/foundation-3.2.5.min.css" />
-    <link rel="stylesheet" href="css/normalize-2.1.2.min.css" />
+    <!--<link rel="stylesheet" href="css/foundation-3.2.5.min.css" />
+    <link rel="stylesheet" href="css/normalize-2.1.2.min.css" />-->
+
+    <link rel="stylesheet" href="css/jquery.mobile-1.4.5.css">
+
+    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="scripts/jquery.mobile-1.4.5.js"></script>
 
     <script>
 
+        $(document).ready(function () {
 
+            $("#logoutLichess").hide();
+
+            $("#loginLichess").click(function () {
+                loadLogin();
+                $("#connectLichess").hide();
+                $("#logoutLichess").show();
+            });
+
+                
+
+                $("#logoutLichess").click(function () {
+                    loadLogout();
+                    $("#logoutLichess").hide();
+                $("#connectLichess").show();
+            });
+        });
     </script>
     <title>ChesstronicV1</title>
+
+
+    <style>
+        .ui-page-theme-a {
+            background: linear-gradient(to bottom, rgba(34,116,247,0), rgba(34,116,247,1));
+            background: url(img/chessBG.jpg) no-repeat center fixed;
+            background-size: cover;
+        }
+
+        .logo {
+            display: block;
+            width: 120px;
+            margin: auto;
+            padding: 10%;
+        }
+
+        .settings {
+            position: absolute;
+            right: 0px;
+            margin-top: 5px;
+            margin-right: 25px;
+        }
+    </style>
 </head>
 <body>
-    <div class="app">
-
-    
 
 
+    <div data-role="page" id="pageone" data-theme="a">
 
+        <div data-role="main" class="ui-content">
 
-        <!--begin section added in from BlueApp2-->
+            <a href="#settings" data-transition="flip" style="float: right;" class="settings ui-btn ui-corner-all ui-icon-gear ui-btn-icon-notext">Gear Icon</a>
 
-        <h1>Bluetooth Serial Chat</h1>
-        <div id="mainPage">
-            <ul id="deviceList"></ul>
-            <button id="refreshButton">Refresh</button>
+            <img class="logo" src="img/Chess-icon.png">
+
+            <div data-role="controlgroup" data-type="vertical">
+                <a href="#pagetwo" data-transition="slide" class="ui-btn ui-icon-carat-r ui-btn-icon-right">Play a Human</a>
+                <a href="#pagetwo" data-transition="slide" class="ui-btn ui-icon-carat-r ui-btn-icon-right">Play the A.I.</a>
+                <a href="#pagetwo" data-transition="slide" class="ui-btn ui-icon-carat-r ui-btn-icon-right">Play Over-The-Board</a>
+            </div><br>
+
+            <div data-role="controlgroup" data-type="vertical">
+                <a href="#pagetwo" data-transition="slide" class="ui-btn ui-icon-carat-r ui-btn-icon-right">Learn Chess</a>
+                <a href="#pagetwo" data-transition="slide" class="ui-btn ui-icon-carat-r ui-btn-icon-right">Play Puzzles</a>
+            </div><br>
+
+            <div data-role="controlgroup" data-type="vertical">
+                <a href="#pagetwo" data-transition="slide" class="ui-btn ui-icon-carat-r ui-btn-icon-right">Review Games</a>
+            </div><br>
+
         </div>
-        <div id="detailPage">
-            <div id="resultDiv"></div>
-            <div>
-                <input type="text" id="messageInput" value="Hello" />
-                <button id="sendButton">Send</button>
-            </div>
-            <button id="disconnectButton">Disconnect</button>
-        </div>
-        <div id="statusDiv"></div>
-
-        <!--end section added in from BlueApp2-->
-        <input type="text" id="name" value="Lanyon">
-
-        <input type="password" id="pass" value="|LANy0n|">
-
-        <button onclick="loadLogin()">Login</button>
-
-        <button onclick="loadUser()">User Info & Games</button>
-
-        <button onclick="loadLogout()">Logout</button>
-
-        <select id="variant">
-            <option value="1">Standard</option>
-            <option value="2">Chess960</option>
-            <option value="5">Three-check</option>
-        </select>
-
-        <select id="level">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">5</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-        </select>
-
-        <select id="color">
-            <option value="white">white</option>
-            <option value="black">black</option>
-            <option value="random">random</option>
-        </select>
-
-        <select id="timeMode">
-            <option value="0">Unlimited</option>
-            <option value="1">Real time</option>
-        </select>
-
-        <!--<input type="text" id="fullID" value="fullID">-->
-
-        <button onclick="createGame()">Create Game</button>
-
-        <select id="gameList"></select>
-
-        <button onclick="gameConnect()" id="gameConnectButton" disabled>Connect to Game</button>
-
-
-
-
-
-
-
-        <!--begin section from example 1000-->
-        <!-- start example HTML -->
-        <div id="board" style="width: 360px"></div>
-        <!-- end example HTML -->
-
-        <script src="scripts/jquery-1.10.1.min.js"></script>
-        <script src="scripts/chessboard.js"></script>
-        <script>
-            var init = function () {
-
-                //--- start example JS ---
-
-                var onDrop = function (source, target) {
-                    document.getElementById("from").value = source;
-                    document.getElementById("to").value = target;
-                    if (document.getElementById('autoSend').checked && source != target)
-                        sendMove();
-                };
-
-                var cfg = {
-                    draggable: true,
-                    position: 'start',
-                    onDrop: onDrop,
-                    sparePieces: false
-                };
-                window.board = ChessBoard('board', cfg);
-                //--- end example JS ---
-
-            }; // end init()
-            $(document).ready(init);
-        </script>
-
-        <!--end section from example 1000-->
-
-
-
-
-
-
-
-        <input type="text" id="from" value="from">
-
-        <input type="text" id="to" value="to">
-
-        <input type="text" id="opponentMove" disabled>
-
-        <button onclick="sendMove()">Send move</button>
-
-        <button onclick="syncFEN()">Sync board</button>
-
-        <input type="checkbox" id="autoLog"> Log server communication<br>
-        <input type="checkbox" id="autoSend" checked> Send moves automatically<br>
-
-        <p id="demo">asdfasfasdfa</p>
-        <p id="demo2">asdfasfasdfa</p>
-        <p id="demo3">asdfasfasdfa</p>
-        <p id="demo4">log socket stuffs here</p>
-
-
-        <script type="text/javascript" src="cordova.js"></script>
-        <script type="text/javascript" src="scripts/index.js"></script>
-        <script type="text/javascript" src="scripts/lichess.js"></script>
-        <script type="text/javascript">
-            app.initialize();
-        </script>
 
 
     </div>
 
+    <div data-role="page" id="pagetwo" data-theme="a">
+        <div data-role="main" class="ui-content">
+            <a href="#pageone" data-transition="slide" data-direction="reverse" class="ui-btn ui-icon-carat-l ui-btn-icon-left ui-btn-inline">Back</a>
+            <a href="#pagethree" data-transition="slide" data-direction="reverse" class="ui-btn ui-icon-carat-r ui-btn-icon-right ui-btn-inline">Forward</a>
+
+            <select id="variant">
+                <option value="1">Standard</option>
+                <option value="2">Chess960</option>
+                <option value="5">Three-check</option>
+            </select>
+
+            <select id="level">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">5</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+            </select>
+
+            <select id="color">
+                <option value="white">white</option>
+                <option value="black">black</option>
+                <option value="random">random</option>
+            </select>
+
+            <select id="timeMode">
+                <option value="0">Unlimited</option>
+                <option value="1">Real time</option>
+            </select>
+
+            <!--<input type="text" id="fullID" value="fullID">-->
+
+            <button onclick="createGame()">Create Game</button>
+
+            <button onclick="loadUser()">Load Games</button>
+
+            <select id="gameList"></select>
+
+            <a href="#pagethree" data-transition="slide"><button onclick="gameConnect()" id="gameConnectButton" disabled>Connect to Game</button></a>
+</div>
+    </div>
+
+    <div data-role="page" id="pagethree" data-theme="a">
+        <div data-role="main" class="ui-content">
+            <a href="#pagetwo" data-transition="slide" data-direction="reverse" class="ui-btn ui-icon-carat-l ui-btn-icon-left ui-btn-inline">Back</a>
+        </div>
+            <!--begin section from example 1000-->
+            <!-- start example HTML -->
+            <div id="board" style="width: 360px"></div>
+            <!-- end example HTML -->
+
+            <!--<script src="scripts/jquery-1.10.1.min.js"></script>-->
+            <script src="scripts/chessboard.js"></script>
+            <script>
+                var init = function () {
+
+                    //--- start example JS ---
+
+                    var onDrop = function (source, target) {
+                        document.getElementById("from").value = source;
+                        document.getElementById("to").value = target;
+                        if (document.getElementById('autoSend').checked && source != target)
+                            sendMove();
+                    };
+
+                    var cfg = {
+                        draggable: true,
+                        position: 'start',
+                        onDrop: onDrop,
+                        sparePieces: false
+                    };
+                    window.board = ChessBoard('board', cfg);
+                    //--- end example JS ---
+
+                }; // end init()
+                $(document).ready(init);
+            </script>
+
+            <!--end section from example 1000-->
+
+
+
+
+
+            <div style="display:none">
+
+                <input type="text" id="from" value="from">
+
+                <input type="text" id="to" value="to">
+
+                <input type="text" id="opponentMove" disabled>
+
+                <!--<button onclick="sendMove()">Send move</button>
+
+        <button onclick="syncFEN()">Sync board</button>-->
+
+                <input type="checkbox" id="autoLog"> Log server communication<br>
+                <input type="checkbox" id="autoSend" checked> Send moves automatically<br>
+
+                <!--<p id="demo">asdfasfasdfa</p>
+        <p id="demo2">asdfasfasdfa</p>
+        <p id="demo3">asdfasfasdfa</p>
+        <p id="demo4">log socket stuffs here</p>-->
+
+            </div>
+
+       
+    </div>
+
+
+
+
+    <div data-role="page" data-dialog="true" id="settings">
+        <div data-role="main" class="ui-content">
+            <a href="#pageone" data-transition="flip" data-direction="reverse">Done</a>
+            <br><br>
+
+            <label for="switch">Toggle Dark Theme:</label>
+            <input type="checkbox" data-role="flipswitch" name="switch" id="switch">
+
+            <a href="#chessclock" class="ui-btn ui-corner-all">Launch Chess Clock</a>
+
+            <a href="#bluetooth" class="ui-btn ui-corner-all">Connect Board</a>
+
+            <a href="#lichess" id="connectLichess" class="ui-btn ui-corner-all">Connect lichess.org Account</a>
+            <a href="#pageone" class="ui-btn ui-corner-all" id="logoutLichess">Logout from lichess.org</a>
+
+        </div>
+    </div>
+
+    <div data-role="page" data-dialog="true" id="bluetooth">
+        <div data-role="main" class="ui-content">
+            <a href="#settings" data-direction="reverse">Cancel</a>
+
+            <h2>Available Boards</h2>
+            <ul data-role="listview" data-inset="true">
+                <li><a href="#">Lanyon's Chesstronic</a></li>
+                <li><a href="#">Dual-SPP</a></li>
+                <li><a href="#">christian van dammes' super awesome chesstronic</a></li>
+            </ul>
+
+            <!--begin section added in from BlueApp2-->
+
+            <h1>Bluetooth Serial Chat</h1>
+            <div id="mainPage">
+                <ul id="deviceList"></ul>
+                <button id="refreshButton">Refresh</button>
+            </div>
+            <div id="detailPage">
+                <div id="resultDiv"></div>
+                <div>
+                    <input type="text" id="messageInput" value="Hello" />
+                    <button id="sendButton">Send</button>
+                </div>
+                <button id="disconnectButton">Disconnect</button>
+            </div>
+            <div id="statusDiv"></div>
+
+            <!--end section added in from BlueApp2-->
+
+        </div>
+    </div>
+
+    <div data-role="page" data-dialog="true" id="lichess">
+        <div data-role="main" class="ui-content">
+            <a href="#settings" data-direction="reverse">Cancel</a>
+
+
+            <div class="ui-field-contain">
+                <h2>Login</h2>
+                <input type="text" id="name" value="Lanyon">
+                <input type="password" id="pass" value="|LANy0n|">
+            </div>
+            <a href="#settings" class="ui-btn" id="loginLichess">Login</a>
+            
+            
+
+
+        </div>
+    </div>
+
+
+
+    <div class="app">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+    </div>
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="scripts/index.js"></script>
+    <script type="text/javascript" src="scripts/lichess.js"></script>
+    <script type="text/javascript">
+            app.initialize();
+    </script>
 </body>
+
 </html>

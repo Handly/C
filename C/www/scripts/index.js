@@ -16,12 +16,12 @@
         var ws = new WebSocket('ws://echo.websocket.org');
 
         ws.onopen = function () {
-            alert('open');
+            //alert('open');
             this.send('hello');         // transmit "hello" after connecting
         };
 
         ws.onmessage = function (event) {
-            alert(event.data);    // will be "hello"
+            //alert(event.data);    // will be "hello"
             this.close();
         };
 
@@ -30,7 +30,7 @@
         };
 
         ws.onclose = function (event) {
-            alert('close code=' + event.code);
+            //alert('close code=' + event.code);
         };
     };
 
@@ -151,8 +151,6 @@ var app = {
     },
     onData: function (data) { // data received from Arduino
         console.log(data);
-        resultDiv.innerHTML = resultDiv.innerHTML + "Received: " + data + "<br/>";
-        resultDiv.scrollTop = resultDiv.scrollHeight;
         document.getElementById("from").value = data.substring(0, 2);
         document.getElementById("to").value = data.substring(2, 4);
         if (document.getElementById('autoSend').checked)
@@ -162,8 +160,6 @@ var app = {
 
         var success = function () {
             console.log("success");
-            resultDiv.innerHTML = resultDiv.innerHTML + "Sent: " + messageInput.value + "<br/>";
-            resultDiv.scrollTop = resultDiv.scrollHeight;
         };
 
         var failure = function () {

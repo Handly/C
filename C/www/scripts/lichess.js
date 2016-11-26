@@ -7,9 +7,6 @@
     // send the proper header information along with the request
     xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
     xhttp.send(params);
-    document.getElementById("demo3").innerHTML = xhttp.statusText;
-    document.getElementById("demo2").innerHTML = xhttp.getAllResponseHeaders();
-    document.getElementById("demo").innerHTML = JSON.stringify(JSON.parse(xhttp.responseText), null, 4);
     //fetchGame();
 }
 
@@ -22,6 +19,8 @@ function createGame() {
     // send the proper header information along with the request
     xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
     xhttp.send(params);
+
+    loadUser();
 }
 
 function loadUser() {
@@ -34,9 +33,6 @@ function loadUser() {
     // send the proper header information along with the request
     xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
     xhttp.send();
-    document.getElementById("demo3").innerHTML = xhttp.statusText;
-    document.getElementById("demo2").innerHTML = xhttp.getAllResponseHeaders();
-    document.getElementById("demo").innerHTML = JSON.stringify(JSON.parse(xhttp.responseText), null, 4);
 
     document.getElementById("gameList").innerHTML = "null";
 
@@ -56,9 +52,6 @@ function loadLogout() {
     // send the proper header information along with the request
     xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
     xhttp.send();
-    document.getElementById("demo3").innerHTML = xhttp.statusText;
-    document.getElementById("demo2").innerHTML = xhttp.getAllResponseHeaders();
-    document.getElementById("demo").innerHTML = JSON.stringify(JSON.parse(xhttp.responseText), null, 4);
 
 
     try {
@@ -257,10 +250,7 @@ function gameConnect() {
         //    }
     
 
-        if (document.getElementById("autoLog").checked) {
-            var innerStuff = document.getElementById("demo4").innerHTML;
-            document.getElementById("demo4").innerHTML = innerStuff + 'received: ' + currEvent.data + "<br>";
-        }
+
 
 
     };
