@@ -20,11 +20,11 @@ function createGame() {
     xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
     xhttp.send(params);
 
-    alert(xhttp.status);
-    alert(xhttp.getResponseHeader("Location"));
-    alert(xhttp.responseText);
+    //alert(xhttp.status);
+    //alert(xhttp.getResponseHeader("Location"));
+    //alert(xhttp.responseText);
 
-    gameConnectAnon(JSON.parse(xhttp.responseText).url.socket, JSON.parse(xhttp.responseText).player.version);
+    gameConnect(JSON.parse(xhttp.responseText).game.id + JSON.parse(xhttp.responseText).player.id);
 
     //loadUser();
 }
@@ -50,6 +50,7 @@ function loadUser() {
     document.getElementById("gameConnectButton").disabled = false;
 }
 
+// response contains version number for lobby socket
 function loadLichess() {
     var xhttp = new XMLHttpRequest();
     var url = "http://en.lichess.org/";
@@ -110,14 +111,6 @@ function fetchSocketUrl(fullID) {
 
 //}
 
-function fetchFullID() {
-
-    var fullID = document.getElementById("gameList").value;
-
-    //alert(fullID);
-    return fullID;
-}
-
 function fetchVersion(fullID) {
     var xhttp = new XMLHttpRequest();
     var url = "http://en.lichess.org/" + fullID;
@@ -151,6 +144,18 @@ function fetchFEN(fullID) {
     var currentFEN = JSON.parse(xhttp.responseText).game.fen;
 
     return currentFEN;
+}
+
+function getWinner(fullID) {
+    var xhttp = new XMLHttpRequest();
+    var url = "http://en.lichess.org/" + fullID +"/end";
+    xhttp.open("GET", url, false);
+
+    // send the proper header information along with the request
+    xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
+    xhttp.send();
+
+    return JSON.parse(xhttp.responseText).winner.name;
 }
 
 function updateVersion(version) {
@@ -207,137 +212,11 @@ function lobbyConnect() {
 }
 
 // connect to a game as a player
-function gameConnectAnon(baseUrl,version) {
+function gameConnect(fullID) {
     window.awaitingAck = false;
-    window.winner = false;
-
-    window.version = version;
-
-    clientId = Math.random().toString(36).substring(2); // created and stored by the client
-
-    var socketUrl = 'ws://socket.en.lichess.org:9021' + baseUrl + '?sri=' + clientId + '&ran=--ranph--';
-    //alert(socketUrl);
-
-    try {
-        socket.close();
-    }
-    catch (err) {
-
-    }
-
-    window.socket = new WebSocket(socketUrl);
-
-    socket.onopen = function () {
-
-        window.pinger = setInterval(function () {
-
-            socket.send(JSON.stringify({
-                t: 'p',
-                v: version
-            }));
-
-        }, 2000)
-
-        //setTimeout(function () { alert('connected!'); }, 1);
-        syncFEN();
-
-
-    };
-
-    socket.onmessage = function (event) {
-        //alert("I received a message!");
-
-        var currEvent = event;
-        var eventData = JSON.parse(currEvent.data);
-        if (eventData.hasOwnProperty("t")) {
-            //alert(eventData.d.uci);
-            if (eventData.t == "resync") {
-                gameConnect();
-                //setTimeout(function () { alert("game resynced and connected!"); }, 1);
-
-            }
-            if (awaitingAck && eventData.t != "ack") {
-                sendMove();
-            }
-            else if (awaitingAck && eventData.t == "ack") {
-                //alert("ack received");
-                awaitingAck = false;
-            }
-            if (eventData.t == "move") {
-                board.move(eventData.d.uci.substring(0, 2) + "-" + eventData.d.uci.substring(2, 4));
-                bluetoothSerial.write(eventData.d.uci);
-            }
-            else if (eventData.t == "b") {
-                if (eventData.d[(eventData.d.length) - 1].t == "end") {
-                    board.move(eventData.d[(eventData.d.length) - 2].d.uci.substring(0, 2) + "-" + (eventData.d[(eventData.d.length) - 2].d.uci.substring(2, 4)));
-                    bluetoothSerial.write(eventData.d[(eventData.d.length) - 2].d.uci);
-                    //switch the below to a getWinner function later on (can retreive info about finished games on lichess)
-                    if (!window.winner) {
-                        window.winner = eventData.d[(eventData.d.length) - 2].d.winner;
-                        setTimeout(function () { alert(winner + " wins!"); }, 1000);
-                    }
-                }
-            }
-        }
-
-
-
-        //    if (currcurrEvent.d.uci) {
-        //        updateVersion(currEvent.d.uci);
-        //        if (document.getElementById('autoSend').checked) {
-        //            console.log(currEvent.d.uci.substring(0, 2) + "-" + currEvent.d.uci.substring(2, 4));
-        //            board.move(currEvent.d.uci.substring(0, 2) + "-" + currEvent.d.uci.substring(2, 4));
-        //            bluetoothSerial.write(currEvent.d.uci);
-        //        }
-        //        document.getElementById("opponentMove").value = currEvent.d.uci;
-        //        //if (d.castle)
-        //        //    alert("castle!");
-        //        //if (d.enpassant)
-        //        //    alert("en passant!");
-        //        if (d.check)
-        //            alert("check!");
-        //    }
-        //    else if (currEvent.d[1].t == "end") {
-        //        if (document.getElementById('autoSend').checked) {
-        //            console.log(currEvent.d[0].uci.substring(0, 2) + "-" + currEvent.d[0].uci.substring(2, 4));
-        //            board.move(currEvent.d[0].uci.substring(0, 2) + "-" + currEvent.d[0].uci.substring(2, 4));
-        //            bluetoothSerial.write(currEvent.d[0].d.uci);
-        //        }
-        //        document.getElementById("opponentMove").value = currEvent.d[0].d.uci;
-        //        if (d[1].d)
-        //            alert(d[1].d + "wins!");
-        //        else
-        //            alert("stalemate!");
-        //    }
-
-
-
-
-
-    };
-
-    socket.onerror = function () {
-        alert('error occurred!');
-    };
-
-    socket.onclose = function (event) {
-        //setTimeout(function () { alert('connection lost! Please Reconnect to game'); }, 1);
-
-        clearInterval(pinger);
-        //socket.close();
-        //gameConnect();
-    };
-
-}
-
-// connect to a game as a player
-function gameConnect() {
-    window.awaitingAck = false;
-    window.winner = false;
-    
-    // var fullID = document.getElementById("fullID").value;
-    var fullID = fetchFullID();
+    window.gameEnded = false;
     window.currentGame = fullID;
+    
     var versionInit = fetchVersion(fullID);
     updateVersion(versionInit);
 
@@ -375,13 +254,13 @@ function gameConnect() {
 
     socket.onmessage = function (event) {
         //alert("I received a message!");
-        
+        console.log(event.data);
         var currEvent = event;
         var eventData = JSON.parse(currEvent.data);
         if (eventData.hasOwnProperty("t")) {
             //alert(eventData.d.uci);
             if (eventData.t == "resync") {
-                gameConnect();
+                gameConnect(currentGame);
                 //setTimeout(function () { alert("game resynced and connected!"); }, 1);
                 
             }
@@ -392,20 +271,41 @@ function gameConnect() {
                 //alert("ack received");
                 awaitingAck = false;
             }
-            if (eventData.t == "move") {
-                board.move(eventData.d.uci.substring(0, 2) + "-" + eventData.d.uci.substring(2, 4));
-                bluetoothSerial.write(eventData.d.uci);
-            }
-            else if (eventData.t == "b") {
-                if (eventData.d[(eventData.d.length) - 1].t == "end") {
-                    board.move(eventData.d[(eventData.d.length) - 2].d.uci.substring(0, 2) + "-" + (eventData.d[(eventData.d.length) - 2].d.uci.substring(2, 4)));
-                    bluetoothSerial.write(eventData.d[(eventData.d.length) - 2].d.uci);
-                    //switch the below to a getWinner function later on (can retreive info about finished games on lichess)
-                    if (!window.winner) {
-                        window.winner = eventData.d[(eventData.d.length) - 2].d.winner;
-                        setTimeout(function () { alert(winner + " wins!"); }, 1000);
+            //if (eventData.t == "move") {
+            //    board.move(eventData.d.uci.substring(0, 2) + "-" + eventData.d.uci.substring(2, 4));
+            //    bluetoothSerial.write(eventData.d.uci);
+            //}
+            // send latest move and listen for "end" event
+            if (eventData.t == "b" && gameEnded == false) {
+                var foundMove = false;
+                for (i = eventData.d.length - 1; i >= 0; i--) {
+                    if (eventData.d[i].t == "move" && foundMove == false) {
+                        board.move(eventData.d[i].d.uci.substring(0, 2) + "-" + (eventData.d[i].d.uci.substring(2, 4)));
+                        bluetoothSerial.write(eventData.d[i].d.uci);
+                        foundMove = true;
                     }
                 }
+                for (i = eventData.d.length-1; i >= 0; i--) {
+                    if (eventData.d[i].t == "end") {
+                        console.log("End event received");
+                        gameEnded = true;
+                        var winningColor = eventData.d[i].d;
+                        setTimeout(function () { alert(winningColor + " wins!"); }, 1000);
+
+                        
+
+                        //alert(getWinner(currentGame));
+
+                        //board.move(eventData.d[(eventData.d.length) - 2].d.uci.substring(0, 2) + "-" + (eventData.d[(eventData.d.length) - 2].d.uci.substring(2, 4)));
+                        //bluetoothSerial.write(eventData.d[(eventData.d.length) - 2].d.uci);
+                        //switch the below to a getWinner function later on (can retreive info about finished games on lichess)
+                        //if (!window.winner) {
+                        //    window.winner = eventData.d[(eventData.d.length) - 2].d.winner;
+                        //    setTimeout(function () { alert(winner + " wins!"); }, 1000);
+                        //}
+                    }
+                }
+                
             }
         }
         
@@ -471,14 +371,6 @@ function sendMove() {
             to: document.getElementById("to").value
         }
     };
-    //send initially
-    //socket.send(JSON.stringify(move));
-    //send periodically until lichess responds with "ack"
-    //window.moveSender = setInterval(function () {
-
-    //    socket.send(JSON.stringify(move));
-
-    //}, 100)
 
     socket.send(JSON.stringify(move));
     window.awaitingAck = true;

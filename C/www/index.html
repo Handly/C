@@ -139,13 +139,11 @@
 
             <button onclick="loadLichess()">connect to lichess</button>
 
-            <button onclick="createGameAnon()">Create Game Anon</button>
-
             <button onclick="loadUser()">Load Games</button>
 
             <select id="gameList"></select>
 
-            <a href="#pagethree" data-transition="slide"><button onclick="gameConnect()" id="gameConnectButton" disabled>Connect to Game</button></a>
+            <a href="#pagethree" data-transition="slide"><button onclick="gameConnect(document.getElementById('gameList').value)" id="gameConnectButton" disabled>Connect to Game</button></a>
 </div>
     </div>
 
