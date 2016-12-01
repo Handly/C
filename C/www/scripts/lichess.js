@@ -212,7 +212,17 @@ function lobbyConnect() {
 }
 
 // connect to a game as a player
+window.currentGame = null;
+window.reconnect = null;
 function gameConnect(fullID) {
+
+    if (currentGame != fullID) {
+        try {
+            socket.close();
+        }
+        catch (err) {}
+    }
+
     window.awaitingAck = false;
     window.gameEnded = false;
     window.currentGame = fullID;
@@ -226,16 +236,19 @@ function gameConnect(fullID) {
     var socketUrl = 'ws://socket.en.lichess.org:9021' + baseUrl + '?sri=' + clientId + '&ran=--ranph--';
     //alert(socketUrl);
 
-    try {
-        socket.close();
-    }
-    catch (err) {
+    
 
-    }
 
     window.socket = new WebSocket(socketUrl);
 
+    
+
     socket.onopen = function () {
+
+        if (reconnect != null) {
+            clearInterval(reconnect);
+            reconnect = null;
+        }
 
         window.pinger = setInterval(function () {
 
@@ -260,7 +273,9 @@ function gameConnect(fullID) {
         if (eventData.hasOwnProperty("t")) {
             //alert(eventData.d.uci);
             if (eventData.t == "resync") {
-                gameConnect(currentGame);
+                socket.close();
+                //gameConnect(currentGame);
+                //window.reconnect = setInterval(function () { gameConnect(currentGame); }, 1000);
                 //setTimeout(function () { alert("game resynced and connected!"); }, 1);
                 
             }
@@ -350,9 +365,16 @@ function gameConnect(fullID) {
     };
 
     socket.onclose = function (event) {
-        //setTimeout(function () { alert('connection lost! Please Reconnect to game'); }, 1);
-        
         clearInterval(pinger);
+        //setTimeout(function () { alert('connection lost! Please Reconnect to game'); }, 1);
+        //socket.close();
+        //gameConnect(currentGame);
+        
+        if (confirm("Connection lost, attempt reconnect?") == true) {
+            gameConnect(currentGame);
+        } 
+        //window.reconnect = setInterval(function () { gameConnect(currentGame); }, 1000);
+        
         //socket.close();
         //gameConnect();
     };
@@ -372,6 +394,7 @@ function sendMove() {
         }
     };
 
-    socket.send(JSON.stringify(move));
-    window.awaitingAck = true;
+        socket.send(JSON.stringify(move));
+        window.awaitingAck = true;
+    
 }
