@@ -296,7 +296,10 @@ function gameConnect(fullID) {
                 for (i = eventData.d.length - 1; i >= 0; i--) {
                     if (eventData.d[i].t == "move" && foundMove == false) {
                         board.move(eventData.d[i].d.uci.substring(0, 2) + "-" + (eventData.d[i].d.uci.substring(2, 4)));
-                        bluetoothSerial.write(eventData.d[i].d.uci);
+                        if (eventData.d[i].d.uci != lastMove) {
+                            bluetoothSerial.write(eventData.d[i].d.uci);
+                            console.log(eventData.d[i].d.uci);
+                        }
                         foundMove = true;
                     }
                 }
@@ -385,16 +388,23 @@ function syncFEN() {
     board.position(fetchFEN(currentGame), false);
 }
 
-function sendMove() {
-    var move = {
-        t: 'move',
-        d: {
-            from: document.getElementById("from").value,
-            to: document.getElementById("to").value
-        }
-    };
 
+window.lastMove = null;
+function sendMove() {
+
+    if (document.getElementById("from").value != document.getElementById("to").value) {
+        var move = {
+            t: 'move',
+            d: {
+                from: document.getElementById("from").value,
+                to: document.getElementById("to").value
+            }
+        };
+
+        board.move(document.getElementById("from").value + "-" + document.getElementById("to").value);
         socket.send(JSON.stringify(move));
         window.awaitingAck = true;
-    
+        lastMove = document.getElementById("from").value + document.getElementById("to").value;
+
+    }
 }
