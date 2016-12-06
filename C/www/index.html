@@ -23,6 +23,8 @@
 
     <script>
 
+        window.fullID = null;
+
         $(document).ready(function () {
 
             $("#logoutLichess").hide();
@@ -41,6 +43,18 @@
                 $("#connectLichess").show();
             });
         });
+
+        $(document).on("pagebeforeshow", "#pagethree", function () { // When entering pagethree
+            if (fullID == null)
+                createGame();
+            else
+                gameConnect(fullID);
+        });
+
+        $(document).on("pagebeforehide", "#pagethree", function () { // When leaving pagethree
+            socket.close();
+        });
+
     </script>
     <title>ChesstronicV1</title>
 
@@ -133,7 +147,7 @@
 
             <!--<input type="text" id="fullID" value="fullID">-->
 
-            <a href="#pagethree" data-transition="slide"><button onclick="createGame()">Create Game</button></a>
+            <a href="#pagethree" data-transition="slide"  class="ui-btn">Create Game</a>
 
             <button onclick="lobbyConnect()">connect to lobby</button>
 
@@ -143,7 +157,7 @@
 
             <select id="gameList"></select>
 
-            <a href="#pagethree" data-transition="slide"><button onclick="gameConnect(document.getElementById('gameList').value)" id="gameConnectButton" disabled>Connect to Game</button></a>
+            <a href="#pagethree" data-transition="slide"><button id="gameConnectButton" disabled>Connect to Game</button></a>
 </div>
     </div>
 

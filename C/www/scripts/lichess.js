@@ -71,15 +71,6 @@ function loadLogout() {
     // send the proper header information along with the request
     xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
     xhttp.send();
-
-
-    try {
-        clearInterval(pinger);
-        socket.close();
-    }
-    catch (err) {
-
-    }
 }
 
 function fetchSocketUrl(fullID) {
@@ -97,19 +88,6 @@ function fetchSocketUrl(fullID) {
     return socketURL;
 }
 
-//function fetchGame() {
-//    var xhttp = new XMLHttpRequest();
-//    var url = "http://en.lichess.org/j0SSEyuWXeBu";
-//    xhttp.open("GET", url, false);
-
-//    // send the proper header information along with the request
-//    xhttp.setRequestHeader("Accept", "application/vnd.lichess.v1+json");
-//    xhttp.send();
-//    //alert(url);
-
-//    alert(JSON.stringify(JSON.parse(xhttp.responseText)));
-
-//}
 
 function fetchVersion(fullID) {
     var xhttp = new XMLHttpRequest();
@@ -216,12 +194,12 @@ window.currentGame = null;
 window.reconnect = null;
 function gameConnect(fullID) {
 
-    if (currentGame != fullID) {
-        try {
-            socket.close();
-        }
-        catch (err) {}
-    }
+    //if (currentGame != fullID) {
+    //    try {
+    //        socket.close();
+    //    }
+    //    catch (err) {}
+    //}
 
     window.awaitingAck = false;
     window.gameEnded = false;
@@ -257,7 +235,7 @@ function gameConnect(fullID) {
                 v: version
             }));
 
-        }, 2000)
+        }, 1000)
 
         //setTimeout(function () { alert('connected!'); }, 1);
         syncFEN();
