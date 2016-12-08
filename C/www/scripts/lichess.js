@@ -47,7 +47,6 @@ function loadUser() {
         document.getElementById("gameList").innerHTML = innerOptions + "<option value=" + JSON.parse(xhttp.responseText).nowPlaying[i].fullId + ">" + JSON.parse(xhttp.responseText).nowPlaying[i].fullId + "</option>";
     }
 
-    document.getElementById("gameConnectButton").disabled = false;
 }
 
 // response contains version number for lobby socket
@@ -235,7 +234,7 @@ function gameConnect(fullID) {
                 v: version
             }));
 
-        }, 1000)
+        }, 2000)
 
         //setTimeout(function () { alert('connected!'); }, 1);
         syncFEN();
@@ -250,58 +249,61 @@ function gameConnect(fullID) {
         var eventData = JSON.parse(currEvent.data);
         if (eventData.hasOwnProperty("t")) {
             //alert(eventData.d.uci);
-            if (eventData.t == "resync") {
-                socket.close();
-                //gameConnect(currentGame);
-                //window.reconnect = setInterval(function () { gameConnect(currentGame); }, 1000);
-                //setTimeout(function () { alert("game resynced and connected!"); }, 1);
-                
-            }
-            if (awaitingAck && eventData.t != "ack") {
-                sendMove();
-            }
-            else if (awaitingAck && eventData.t == "ack") {
-                //alert("ack received");
-                awaitingAck = false;
-            }
-            //if (eventData.t == "move") {
-            //    board.move(eventData.d.uci.substring(0, 2) + "-" + eventData.d.uci.substring(2, 4));
-            //    bluetoothSerial.write(eventData.d.uci);
-            //}
-            // send latest move and listen for "end" event
-            if (eventData.t == "b" && gameEnded == false) {
-                var foundMove = false;
-                for (i = eventData.d.length - 1; i >= 0; i--) {
-                    if (eventData.d[i].t == "move" && foundMove == false) {
-                        board.move(eventData.d[i].d.uci.substring(0, 2) + "-" + (eventData.d[i].d.uci.substring(2, 4)));
-                        if (eventData.d[i].d.uci != lastMove) {
-                            bluetoothSerial.write(eventData.d[i].d.uci);
-                            console.log(eventData.d[i].d.uci);
-                        }
-                        foundMove = true;
-                    }
+            if (eventData.t != "n") {
+                if (awaitingAck && eventData.t != "ack") {
+                    sendMove();
                 }
-                for (i = eventData.d.length-1; i >= 0; i--) {
-                    if (eventData.d[i].t == "end") {
-                        console.log("End event received");
-                        gameEnded = true;
-                        var winningColor = eventData.d[i].d;
-                        setTimeout(function () { alert(winningColor + " wins!"); }, 1000);
-
-                        
-
-                        //alert(getWinner(currentGame));
-
-                        //board.move(eventData.d[(eventData.d.length) - 2].d.uci.substring(0, 2) + "-" + (eventData.d[(eventData.d.length) - 2].d.uci.substring(2, 4)));
-                        //bluetoothSerial.write(eventData.d[(eventData.d.length) - 2].d.uci);
-                        //switch the below to a getWinner function later on (can retreive info about finished games on lichess)
-                        //if (!window.winner) {
-                        //    window.winner = eventData.d[(eventData.d.length) - 2].d.winner;
-                        //    setTimeout(function () { alert(winner + " wins!"); }, 1000);
-                        //}
-                    }
+                else if (awaitingAck && eventData.t == "ack") {
+                    //alert("ack received");
+                    awaitingAck = false;
                 }
-                
+                if (eventData.t == "resync") {
+                    socket.close();
+                    //gameConnect(currentGame);
+                    //window.reconnect = setInterval(function () { gameConnect(currentGame); }, 1000);
+                    //setTimeout(function () { alert("game resynced and connected!"); }, 1);
+
+                }
+                else if (eventData.t == "move") {
+                    board.move(eventData.d.uci.substring(0, 2) + "-" + eventData.d.uci.substring(2, 4));
+                    bluetoothSerial.write(eventData.d.uci);
+                }
+
+                //// send latest move and listen for "end" event
+                //if (eventData.t == "b" && gameEnded == false) {
+                //    var foundMove = false;
+                //    for (i = eventData.d.length - 1; i >= 0; i--) {
+                //        if (eventData.d[i].t == "move" && foundMove == false) {
+                //            board.move(eventData.d[i].d.uci.substring(0, 2) + "-" + (eventData.d[i].d.uci.substring(2, 4)));
+                //            if (eventData.d[i].d.uci != lastMove) {
+                //                bluetoothSerial.write(eventData.d[i].d.uci);
+                //                console.log(eventData.d[i].d.uci);
+                //            }
+                //            foundMove = true;
+                //        }
+                //    }
+                //    for (i = eventData.d.length-1; i >= 0; i--) {
+                //        if (eventData.d[i].t == "end") {
+                //            console.log("End event received");
+                //            gameEnded = true;
+                //            var winningColor = eventData.d[i].d;
+                //            setTimeout(function () { alert(winningColor + " wins!"); }, 1000);
+
+
+
+                //            //alert(getWinner(currentGame));
+
+                //            //board.move(eventData.d[(eventData.d.length) - 2].d.uci.substring(0, 2) + "-" + (eventData.d[(eventData.d.length) - 2].d.uci.substring(2, 4)));
+                //            //bluetoothSerial.write(eventData.d[(eventData.d.length) - 2].d.uci);
+                //            //switch the below to a getWinner function later on (can retreive info about finished games on lichess)
+                //            //if (!window.winner) {
+                //            //    window.winner = eventData.d[(eventData.d.length) - 2].d.winner;
+                //            //    setTimeout(function () { alert(winner + " wins!"); }, 1000);
+                //            //}
+                //        }
+                //    }
+
+                //}
             }
         }
         

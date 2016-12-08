@@ -27,6 +27,18 @@
 
         $(document).ready(function () {
 
+            $("#gameList").change(function () {
+                localStorage.fullID = $(this).val();
+            });
+
+            //$("#createGame").on("tap", function () {
+            //    localStorage.fullID = null;
+            //    localStorage.variant = $("#variant").val();
+            //    localStorage.level = $("#level").val();
+            //    localStorage.color = $("#color").val();
+            //    localStorage.timeMode = $("#timeMode").val();
+            //});
+
             $("#logoutLichess").hide();
 
             $("#loginLichess").click(function () {
@@ -44,16 +56,16 @@
             });
         });
 
-        $(document).on("pagebeforeshow", "#pagethree", function () { // When entering pagethree
-            if (fullID == null)
-                createGame();
-            else
-                gameConnect(fullID);
-        });
+        //$(document).on("pagebeforeshow", "#pagethree", function () { // When entering pagethree
+        //    if (fullID == null)
+        //        createGame();
+        //    else
+        //        gameConnect(fullID);
+        //});
 
-        $(document).on("pagebeforehide", "#pagethree", function () { // When leaving pagethree
-            socket.close();
-        });
+        //$(document).on("pagebeforehide", "#pagethree", function () { // When leaving pagethree
+        //    socket.close();
+        //});
 
     </script>
     <title>ChesstronicV1</title>
@@ -115,7 +127,7 @@
     <div data-role="page" id="pagetwo" data-theme="a">
         <div data-role="main" class="ui-content">
             <a href="#pageone" data-transition="slide" data-direction="reverse" class="ui-btn ui-icon-carat-l ui-btn-icon-left ui-btn-inline">Back</a>
-            <a href="#pagethree" data-transition="slide" data-direction="reverse" class="ui-btn ui-icon-carat-r ui-btn-icon-right ui-btn-inline">Forward</a>
+            <a href="chessboard.html" rel="external" data-transition="slide" data-direction="reverse" class="ui-btn ui-icon-carat-r ui-btn-icon-right ui-btn-inline">Forward</a>
 
             <select id="variant">
                 <option value="1">Standard</option>
@@ -147,17 +159,12 @@
 
             <!--<input type="text" id="fullID" value="fullID">-->
 
-            <a href="#pagethree" data-transition="slide"  class="ui-btn">Create Game</a>
-
-            <button onclick="lobbyConnect()">connect to lobby</button>
-
-            <button onclick="loadLichess()">connect to lichess</button>
+            <button data-transition="slide" id="createGame">Create Game</button>
 
             <button onclick="loadUser()">Load Games</button>
 
             <select id="gameList"></select>
 
-            <a href="#pagethree" data-transition="slide"><button id="gameConnectButton" disabled>Connect to Game</button></a>
 </div>
     </div>
 
@@ -180,8 +187,8 @@
                     var onDrop = function (source, target) {
                         document.getElementById("from").value = source;
                         document.getElementById("to").value = target;
-                        if (document.getElementById('autoSend').checked && source != target)
-                            sendMove();
+                        //if (document.getElementById('autoSend').checked && source != target)
+                        //    sendMove();
                     };
 
                     var cfg = {
@@ -326,6 +333,7 @@
     <script type="text/javascript" src="cordova.js"></script>
     <script type="text/javascript" src="scripts/index.js"></script>
     <script type="text/javascript" src="scripts/lichess.js"></script>
+    <script type="text/javascript" src="scripts/game.js"></script>
     <script type="text/javascript">
             app.initialize();
     </script>

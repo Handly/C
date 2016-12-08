@@ -1,0 +1,173 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <!--
+        Customize the content security policy in the meta tag below as needed. Add 'unsafe-inline' to default-src to enable inline JavaScript.
+        For details, see http://go.microsoft.com/fwlink/?LinkID=617521
+    -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'unsafe-inline' 'self' data: gap: https://ssl.gstatic.com http://en.lichess.org https://code.jquery.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; connect-src *">
+
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+    <!--<link rel="stylesheet" type="text/css" href="css/index.css">-->
+
+    <link rel="stylesheet" href="css/chessboard.css" />
+    <!--<link rel="stylesheet" href="css/foundation-3.2.5.min.css" />
+    <link rel="stylesheet" href="css/normalize-2.1.2.min.css" />-->
+
+    <link rel="stylesheet" href="css/jquery.mobile-1.4.5.css">
+
+    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="scripts/jquery.mobile-1.4.5.js"></script>
+
+    <script>
+
+        $(document).ready(function () {
+            if (localStorage.fullID != null)
+                gameConnect(localStorage.fullID);
+            else
+                createGame;
+
+            syncFEN;
+            
+        });
+
+    </script>
+    <title>ChesstronicV1</title>
+
+
+    <style>
+        .ui-page-theme-a {
+            background: linear-gradient(to bottom, rgba(34,116,247,0), rgba(34,116,247,1));
+            /*background: url(img/chessBG.jpg) no-repeat center fixed;*/
+            background-size: cover;
+        }
+
+        .logo {
+            display: block;
+            width: 120px;
+            margin: auto;
+            padding: 10%;
+        }
+
+        .settings {
+            position: absolute;
+            right: 0px;
+            margin-top: 5px;
+            margin-right: 25px;
+        }
+    </style>
+</head>
+<body>
+
+
+
+
+
+
+    <div data-role="page" id="chessle" data-theme="a">
+        <div data-role="main" class="ui-content">
+            <a href="#pagetwo" data-transition="slide" data-direction="reverse" class="ui-btn ui-icon-carat-l ui-btn-icon-left ui-btn-inline">Back</a>
+        </div>
+        <!--begin section from example 1000-->
+        <!-- start example HTML -->
+        <div id="board" style="width: 360px"></div>
+        <!-- end example HTML -->
+        <!--<script src="scripts/jquery-1.10.1.min.js"></script>-->
+        <script src="scripts/chessboard.js"></script>
+        <script>
+                var init = function () {
+
+                    //--- start example JS ---
+
+                    var onDrop = function (source, target) {
+                        document.getElementById("from").value = source;
+                        document.getElementById("to").value = target;
+                        if (document.getElementById('autoSend').checked && source != target)
+                            sendMove();
+                    };
+
+                    var cfg = {
+                        draggable: true,
+                        position: 'start',
+                        onDrop: onDrop,
+                        sparePieces: false
+                    };
+                    window.board = ChessBoard('board', cfg);
+                    //--- end example JS ---
+
+                }; // end init()
+                $(document).ready(init);
+        </script>
+
+        <!--end section from example 1000-->
+
+
+
+
+
+        <div style="display:none">
+
+            <input type="text" id="from" value="from">
+
+            <input type="text" id="to" value="to">
+
+            <input type="text" id="opponentMove" disabled>
+
+            <!--<button onclick="sendMove()">Send move</button>
+
+            <button onclick="syncFEN()">Sync board</button>-->
+
+            <input type="checkbox" id="autoLog"> Log server communication<br>
+            <input type="checkbox" id="autoSend" checked> Send moves automatically<br>
+
+            <!--<p id="demo">asdfasfasdfa</p>
+            <p id="demo2">asdfasfasdfa</p>
+            <p id="demo3">asdfasfasdfa</p>
+            <p id="demo4">log socket stuffs here</p>-->
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+
+    
+
+
+
+    <div class="app">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="scripts/index.js"></script>
+    <script type="text/javascript" src="scripts/lichess.js"></script>
+    <script type="text/javascript">
+            app.initialize();
+    </script>
+</body>
+
+</html>
